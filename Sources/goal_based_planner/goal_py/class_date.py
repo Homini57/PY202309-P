@@ -1,5 +1,6 @@
 from datetime import datetime
 
+
 class Date():
     def __init__(self,day = None, month = None):
         self.month = month
