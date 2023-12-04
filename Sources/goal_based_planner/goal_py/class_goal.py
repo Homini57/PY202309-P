@@ -33,7 +33,7 @@ def write_data_file(data_field):
             data_lists = [[data for data in [goal.goal_number, goal.date.month, goal.date.day,\
                                             goal.deadline.date.month, goal.deadline.date.day,\
                                             goal.term, goal.achivement]] for goal in data_field]
-            writer.writerows(data_lists)
+            writer.writerows(data_lists)x
     except:
         print('데이터 저장에 이상이 있습니다.')
         
@@ -42,7 +42,7 @@ def read_contents_file():
     try:
         contents_field = {}
         file_name = 'goal_csv/goal_contents.csv'
-        with open(file_name, 'r', encoding ='utf-8') as file:
+        with open(file_name, 'r', encoding ='utf-8') as file: 
             reader = csv.reader(file)
             for row in reader:
                 contents_field[row[0]] = row[1]
