@@ -1,7 +1,7 @@
 #Goal 클래스는 설정페이지에서 본격적으로 쓰일 것
-from goal_py.class_date import today
+from goal_py.class_date import Today
 from goal_py.class_goal import Goal, GoalField, to_digit_number
-# 페이지 클래스 : 목표 레벨 삭제
+# 페이지 클래스
 class Page():
     opened_pages = []
     # 필드 : 페이지 제목, 목표 레벨, 출력 메뉴 항목
@@ -12,13 +12,13 @@ class Page():
         self.basic_menu = [' +. 추가           ','-. 삭제           ','enter. 세부 내용', \
                            '-1. 이전으로       ','0. 메인으로       ','    ?. 도움말  ', \
                             'esc.프로그램 종료']
+    def update_page(self):
+        self.__init__(self.title, self.menu_list)
     # 제목과 기본 메뉴를 출력 페이지 앞부분에 출력
     # C++의 가상함수처럼 이것도 상속으로 다르게 정의하고 같은 페이지 리스트에 저장할 수 있을까?
     def print_menu(self):
         
         print('')
-        print('===================================================')
-        print(self.title)
         print('===================================================')
         for menu in self.basic_menu:
             print(menu,end='')
@@ -26,6 +26,8 @@ class Page():
             if menu_index % 3 == 2:
                 print('')
         print('')
+        print('---------------------------------------------------')
+        print(self.title)
         print('---------------------------------------------------')
         for i in range(0,len(self.menu_list)):
             print(f"{i+1}. {self.menu_list[i]}")
@@ -42,7 +44,10 @@ class Page():
 
     def delete_page(self):
         last_index = len(self.opened_pages) - 1
-        del(self.opened_pages[last_index])
+        if last_index > 0:
+            del(self.opened_pages[last_index])
+        else:
+            print('이전 페이지가 없습니다.')
 
 
 class GoalPage(Page):
@@ -50,12 +55,59 @@ class GoalPage(Page):
         # 선택한 목표 데이터 중 목표 내용, 하위 목표 항목 생성
         self.goal = selected_goal
         goal_content = selected_goal.get_content()
-        sub_goal_list = [goal for goal in GoalField().data \
-                         if goal.get_higher_goal_number() == selected_goal.goal_numeber]
-        sub_goal_contents = [goal.get_content() for goal in sub_goal_list]
+        self.sub_goal_list = [goal for goal in GoalField().data \
+                         if goal.get_higher_goal_number() == selected_goal.goal_number]
+        sub_goal_contents = [goal.get_content() for goal in self.sub_goal_list]
         super().__init__(goal_content, sub_goal_contents)
 
-    def open_page(self, menu_list = []):
+    def update_page(self):
+        self.__init__(self.goal)
+
+    def open_page(self):
+        self.print_menu()
+        command = input()
+        #return_message = RunMenu(goal_data_field, todays_goal_list, command)
+        if(command == ''):
+            pass
+        elif(command == '+'):
+            next_page = AddGoalPage(self.goal)
+            self.in_opened_pages(next_page)
+        elif(command == '-'):
+            next_page = DeleteGoalPage(self.goal)
+            self.in_opened_pages(next_page)
+        elif(command == '0'):
+            next_page = MainGoalPage()
+            self.in_opened_pages(next_page)
+        elif(command == '-1'):
+            self.delete_page()
+        elif(command == 'esc'):
+            return True
+        # 1 이상의 정수를 입력받을 경우 해당 목표 페이지 열기
+        # 같은 코드 반복, 함수화 고려
+        try:
+            int_command = int(command)
+        except:
+            pass
+        else:
+            if (0 < int_command and int_command <= len(self.menu_list)+ 1):
+                selected_goal = self.sub_goal_list[int_command - 1]
+                next_page = GoalPage(selected_goal)
+                self.in_opened_pages(next_page)
+        return False
+
+class MainGoalPage(GoalPage):
+    def __init__(self):
+        self.goal = Goal()
+        super().__init__(self.goal)
+        del(self.sub_goal_list[0])
+        del(self.menu_list[0])
+        #main_goal_list = [goal for goal in GoalField().data if goal.get_level() == 0]
+        #main_goal_contents = [goal.get_content() for goal in main_goal_list]
+        self.basic_menu[4] = '0. 오늘 목표로 전환'
+    def update_page(self):
+        self.__init__()
+
+    def open_page(self):
         self.print_menu()
         command = input()
         #return_message = RunMenu(goal_data_field, todays_goal_list, command)
@@ -68,9 +120,9 @@ class GoalPage(Page):
             next_page = DeleteGoalPage(self.goal)
             self.in_opened_pages(next_page)
         elif(command == '0'):
-            pass
+            pass #next_page = MainDatePage()
         elif(command == '-1'):
-            DeleteGoalPage()
+            self.delete_page()
         elif(command == 'esc'):
             return True
         # 1 이상의 정수를 입력받을 경우 해당 목표 페이지 열기
@@ -80,33 +132,27 @@ class GoalPage(Page):
         except:
             pass
         else:
-            if (0 < int_command and int_command <= len(menu_list)+ 1):
-                selected_goal = menu_list[int_command - 1]
+            if (0 < int_command and int_command <= len(self.menu_list)):
+                selected_goal = self.sub_goal_list[int_command - 1]
                 next_page = GoalPage(selected_goal)
                 self.in_opened_pages(next_page)
         return False
-
-class MainGoalPage(GoalPage):
-    def __init__(self):
-        main_goal = Goal('')
-        #main_goal_list = [goal for goal in GoalField().data if goal.get_level() == 0]
-        #main_goal_contents = [goal.get_content() for goal in main_goal_list]
-        super().__init__(main_goal)
-        self.basic_menu[4] = '0. 오늘 목표로 전환'
 
 class EditGoalPage(GoalPage):
     # 제목과 기본 메뉴를 출력 페이지 앞부분에 출력
     def __init__(self, goal):
         super().__init__(goal)
         for i in range(0,3):
-            del(self.basic_menu[i])
+            del(self.basic_menu[0])
+    def update_page(self):
+        self.__init__(self.goal)
     def print_menu(self, edit_title):
-        print('---------------------------------------------------')
         for menu in self.basic_menu:
             print(menu,end='')
             menu_index = self.basic_menu.index(menu)
             if menu_index % 3 == 2:
                 print('')
+        print('')
         print('---------------------------------------------------')
         print(f'{edit_title} : ', end = '')
     
@@ -116,28 +162,37 @@ class EditGoalPage(GoalPage):
         # 해당 번호의 각 필드에 새로운 목표 생성, 입력을 내용에 저장(GoalField().data.append(Goal(goal_number))), GoalField().contents[goal_number] = contents)
         return False
 class AddGoalPage(EditGoalPage):
-    def open_page(self, menu_list = []):
-        self.print_menu()
+    def open_page(self):
+        self.print_menu('목표 추가')
         command = input()
         #return_message = RunMenu(goal_data_field, todays_goal_list, command)
         if(command == '0'):
-            pass
+            next_page = MainGoalPage()
+            self.in_opened_pages(next_page)
         elif(command == '-1'):
-            DeleteGoalPage()
+            self.delete_page()
         elif(command == 'esc'):
             return True
         # 1 이상의 정수를 입력받을 경우 해당 목표 페이지 열기
         # 같은 코드 반복, 함수화 고려
         else:
-            goal_number = GoalField().get_goal(self.title).goal_number
+            current_goal_number = self.goal.goal_number
+            last_goal = None
             for goal in GoalField().data:
-                if goal_number == goal.get_higher_goal_number():
+                if goal.get_higher_goal_number() == current_goal_number:
                     last_goal = goal
-            goal_level = last_goal.get_goal_level()
-            last_part_number = last_goal.get_part_number(goal_level)
-            new_part_number = to_digit_number(int(last_part_number)+1, 2)
-            new_goal_number = goal_number + new_part_number
-            last_index = GoalField().data.index(last_goal)
+            if last_goal != None:
+                goal_level = last_goal.get_goal_level()
+                last_part_number = last_goal.get_part_number(goal_level)
+                if last_part_number != '':
+                    new_part_number = to_digit_number(int(last_part_number)+1, 2)
+                else:
+                    new_part_number = '01'
+                new_goal_number = current_goal_number + new_part_number
+                last_index = GoalField().data.index(last_goal)
+            else:
+                new_goal_number = current_goal_number + '01'
+                last_index = GoalField().data.index(self.goal)
             GoalField().data.insert(last_index+1,Goal(new_goal_number))
             GoalField().contents[new_goal_number] = command
 class DeleteGoalPage(EditGoalPage):
@@ -148,15 +203,21 @@ class DatePage(Page):
         super().__init__(title, menu_list)
         self.basic_menu[2] = 'enter. 다음 날짜'
 
+    def update_page(self):
+        self.__init__(self.self.title, self.menu_list)
+
 
     
 class TodaysGoalPage(DatePage):
     def __init__(self, title = '오늘 목표', menu_list = []):
         sample_goal = Goal()
-        todays_goal_list = [goal for goal in GoalField().data if goal.check_date_in_term(today)]
+        todays_goal_list = [goal for goal in GoalField().data if goal.check_date_in_term(Today())]
         todays_goal_contents = [goal.get_content() for goal in todays_goal_list]
         super().__init__(title, todays_goal_contents)
         self.basic_menu[4] = '0. 메인 목표로 전환'
+
+    def update_page(self):
+        self.__init__(self.self.title, self.menu_list)
 
 
 

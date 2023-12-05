@@ -1,11 +1,11 @@
-from class_date import Date
+from goal_py.class_date import Date
 import csv
 
 class Goal():
     DIGIT_SIZE = 2    #목표 번호의 단위 자릿수
     #goal_contents_field = {}
 
-    def __init__(self, goal_number = '', date:Date = None, deadline:Date = None, term = None, achivement =None):
+    def __init__(self, goal_number = '', date:Date = Date(), deadline:Date = Date(), term = 0, achivement =0.0):
         
         # 목표 번호와 날짜에 0 입력시 없음으로 인식하도록
         # 목표 번호는 문자열로 저장하여 마지막 자리의 0을 포함할 수 있도록 하기
@@ -19,7 +19,7 @@ class Goal():
         # 디폴트값 = 오늘날짜
         self.deadline = deadline #date클래스
         self.term = term #주기 클래스 : 요일별, 격일, 격주, 격월
-        self.입력achivement = achivement #정수? 부동소수형
+        self.achivement = achivement #정수? 부동소수형
         self.현재achivement = 0.0
        
         
@@ -74,26 +74,32 @@ def read_data_file():
     with open(file_path, 'r', encoding ='utf-8') as file:
         try:
             reader = csv.reader(file)
+
             for row in reader:
                 # goal class arguement : goal_number, date, deadline, term, achivement
                 goal_instance = Goal(row[0], Date(int(row[1]), int(row[2])),\
                                       Date(int(row[3]), int(row[4])), int(row[5]), float(row[6]))
                 data_field.append(goal_instance)
+        except IndexError:
+            print('1 : 데이터 로드(인덱스 에러) 이상')
         except:
-            print('데이터 로드에 이상이 생겼습니다.')
+            print('1 : 데이터 로드에 이상이 생겼습니다.')
         return data_field
 #목표들 저장
 def write_data_file(data_field):
     try:
         file_path = 'goal_csv/goal_data.csv'
-        with open(file_path, 'w', encoding ='utf-8') as file:
+        with open(file_path, 'w', encoding ='utf-8', newline='') as file:
             writer = csv.writer(file)
-            data_lists = [[data for data in [goal.goal_number, goal.date.month, goal.date.day,\
-                                            goal.deadline.date.month, goal.deadline.date.day,\
-                                            goal.term, goal.achivement]] for goal in data_field]
-            writer.writerows(data_lists)
+            data_list = []
+            for goal in data_field:
+                data = [goal.goal_number, goal.date.month, goal.date.day,\
+                        goal.deadline.month, goal.deadline.day, goal.term,\
+                        goal.achivement]
+                data_list.append(data)
+            writer.writerows(data_list)
     except:
-        print('데이터 저장에 이상이 있습니다.')
+       print('1 : 데이터 저장에 이상이 있습니다.')
         
 #목표 번호와 내용 딕셔너리 생성
 def read_contents_file():
@@ -105,18 +111,18 @@ def read_contents_file():
             for row in reader:
                 contents_field[row[0]] = row[1]
     except:
-        '데이터 로드에 이상이 생겼습니다.'
+        '2 : 데이터 로드에 이상이 생겼습니다.'
     return contents_field
 
 def write_contents_file(contents_field):
     try:
         file_name = 'goal_csv/goal_contents.csv'
-        with open(file_name, 'w', encoding ='utf-8') as file:
+        with open(file_name, 'w', encoding ='utf-8', newline='') as file:
             writer = csv.writer(file)
             contents_lists = [[key] + [value] for key, value in contents_field.items()]
             writer.writerows(contents_lists)
     except:
-        '데이터 저장에 이상이 있습니다.'
+        '2 : 데이터 저장에 이상이 있습니다.'
 
 def to_digit_number(number, digit_size):
     digit_number = ''
@@ -138,6 +144,4 @@ class GoalField():
     
 if __name__ == '__main__':
     for data in GoalField().data:
-        print(data.goal_number, data.date.month, data.date.day, data.deadline.month, data.deadline.day, data.term, data.입력achivement)
-        print(GoalField().contents)
-
+        print(data.goal_number)

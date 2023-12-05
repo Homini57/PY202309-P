@@ -34,13 +34,13 @@ class Date():
 
 class Today(Date):
     def __init__(self):
-        current_date = datetime.now()
-        month = current_date.month
-        day = current_date.day
-        super.__init__(month, day)
+        self.set_today()
 
-today = Date()
-today.set_today()
+
+if __name__ == '__main__':
+    today = Today()
+    print(today.day, today. month, today.week)
+
 # Date 인스턴스 생성
 #date_instance1 = Date()
 #print(f"Date(): week={date_instance1.week}, month={date_instance1.month}, day={date_instance1.day}")
