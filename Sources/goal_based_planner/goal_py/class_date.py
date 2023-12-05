@@ -2,16 +2,9 @@ from datetime import datetime
 
 
 class Date():
-    def __init__(self,day = None, month = None):
+    def __init__(self,month = 0, day = 0):
         self.month = month
         self.day = day
-        if month == None:
-            current_date = datetime.now()
-            current_month = current_date.month
-            self.month = current_month
-        if day == None:
-            self.month = 0
-            self.day = 0
         self.week = self.get_week(self.month, self.day)
         if self.week == "유효하지 않은 날짜":
             print("유효하지 않은 날짜입니다.")
@@ -39,6 +32,12 @@ class Date():
         self.day = current_date.day
         self.week = self.get_week(self.month, self.day)
 
+class Today(Date):
+    def __init__(self):
+        current_date = datetime.now()
+        month = current_date.month
+        day = current_date.day
+        super.__init__(month, day)
 
 today = Date()
 today.set_today()
