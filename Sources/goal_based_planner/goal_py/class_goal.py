@@ -1,3 +1,6 @@
+# 모듈 이름은 goal_module로 수정?
+#패키지를 풀고 날짜 클래스와 목표 클래스를 분리?
+
 from goal_py.class_date import Date
 import csv
 
