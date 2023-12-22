@@ -21,15 +21,12 @@ class Goal():
         self.date = date # date클래스
         # 디폴트값 = 오늘날짜
         self.deadline = deadline #date클래스
-        self.term = term #주기 클래스 : 요일별, 격일, 격주, 격월
+        self.term = term
         self.achivement = achivement #정수? 부동소수형
         self.현재achivement = 0.0
        
         
-
-        # 처음에 파일을 읽어서 리스트로 저장해 놓은 후
-        #리스트에 접근하여 수정한 후
-        #프로그램을 종료할 때 파일을 열어서 저장한 후 종료하기
+        # 목표 레벨 = 목표 번호 개수 -1
     def get_goal_level(self):
         digits_number = len(self.goal_number)
         goal_level = digits_number // self.DIGIT_SIZE - 1
@@ -59,6 +56,7 @@ class Goal():
         goal_content = GoalField().contents[self.goal_number]
         return goal_content
     
+        # 이 날짜에 반복해야 하는지 확인
     def check_date_in_term(self, date):
         deadline_month = self.deadline.month
         deadline_day = self.deadline.day
@@ -138,10 +136,53 @@ class GoalField():
     data = read_data_file()
     contents = read_contents_file()
 
+    def get_goal_number(self, content):
+        for goal_number in self.contents:
+            if self.contents[goal_number] == content:
+                return goal_number
+
     def get_goal(self, goal_number): #번호를 받아 목표 반환
         for goal in self.data:
             if goal.goal_number == goal_number:
                 return goal
+            
+    def get_sub_goal_list(self, selected_goal):
+        sub_goal_list = []
+        for goal in self.data:
+                if goal.goal_number == '':
+                    continue
+                elif goal.get_higher_goal_number() == selected_goal.goal_number:
+                    sub_goal_list.append(goal)
+        return sub_goal_list
+    def set_sub_goal (self, higher_goal, sub_goal = Goal(), sub_goal_content = ''):
+        current_goal_number = higher_goal.goal_number
+        sub_goal_list = self.get_sub_goal_list(higher_goal)
+        last_sub_goal_index = len(sub_goal_list) - 1
+        # 목표 데이터 필드 상 마지막 하위 목표의 인덱스 계산, 새 목표의 마지막 번호 계산
+        # 하위 목표가 존재할 경우 생성 방법
+        if last_sub_goal_index >= 0:
+            last_sub_goal = sub_goal_list[last_sub_goal_index]
+            goal_level = last_sub_goal.get_goal_level()
+            last_part_number = last_sub_goal.get_part_number(goal_level)
+            new_part_number = to_digit_number(int(last_part_number)+1, last_sub_goal.DIGIT_SIZE)
+            last_index = self.data.index(last_sub_goal)
+        # 하위 목표가 없는 경우 현재 페이지의 목표의 인덱스로 계산
+        else:
+            new_part_number = '01'
+            last_index = self.data.index(higher_goal)
+        # 새 목표의 목표 번호 계산
+        new_goal_number = current_goal_number + new_part_number
+        if( sub_goal.goal_number != ''):
+            sub_sub_goal_list = self.get_sub_goal_list(sub_goal)
+            del self.contents[sub_goal.goal_number]
+            sub_goal.goal_number = new_goal_number
+            self.contents[new_goal_number] = sub_goal_content
+            for sub_sub_goal in sub_sub_goal_list:
+                GoalField().set_sub_goal(sub_goal, sub_sub_goal, sub_sub_goal.get_content())
+        # 위치에 맞게 데이터 필드에 새 목표 입력, 내용 필드에 내용 추가
+        else:
+            self.data.insert(last_index+1,Goal(new_goal_number))
+            self.contents[new_goal_number] = sub_goal_content
     #def getGoal(contents): 내용을 받아 해당하는 목표 리스트? 반환? (내용이 중복될 수 있으므로)
     #def getGoal(date) : 날짜를 받아 해당하는 목표 리스트 반환
     
