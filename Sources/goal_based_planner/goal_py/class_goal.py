@@ -10,20 +10,13 @@ class Goal():
 
     def __init__(self, goal_number = '', date:Date = Date(), deadline:Date = Date(), term = 0, achivement =0.0):
         
-        # 목표 번호와 날짜에 0 입력시 없음으로 인식하도록
-        # 목표 번호는 문자열로 저장하여 마지막 자리의 0을 포함할 수 있도록 하기
-        # 목표 번호 - 목표 내용 표를 따로 저장.
         self.goal_number = goal_number # 오른쪽부터 2자리 수씩 상위-> 하위 ex. 120302 : 02번 메인목표 - 03번 하위목표 - 12번 하위목표
-        # self.higher_goal = 0 #goal 클래스 입력
-        # self.sub_goal = []#목표 번호 입력, 필요한가?
-        # self.is달성 = False #필요한가?
-        
-        self.date = date # date클래스
-        # 디폴트값 = 오늘날짜
-        self.deadline = deadline #date클래스
+        self.date = date 
+
+        self.deadline = deadline 
         self.term = term
-        self.achivement = achivement #정수? 부동소수형
-        self.현재achivement = 0.0
+        self.achivement = achivement
+        self.achivement_now = 0.0
        
         
         # 목표 레벨 = 목표 번호 개수 -1

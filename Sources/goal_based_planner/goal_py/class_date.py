@@ -25,6 +25,7 @@ class Date():
             return week
         except ValueError:
             return "유효하지 않은 날짜"
+    # 요일 반환
     def get_weekday(self):
         date = datetime(datetime.now().year, self.month, self.day)
         weekday_number = date.weekday()
@@ -36,11 +37,13 @@ class Date():
         self.month = current_date.month
         self.day = current_date.day
         self.week = self.get_week(self.month, self.day)
+    # 다음 날의 날짜 반환
     def get_next_date(self, next = 1):
         month = self.month + (self.day + next - 1) // last_day_of_month(self.month)
         day = (self.day + next - 1) %  last_day_of_month(self.month) + 1
         next_date = Date(month, day)
         return next_date
+    # 타입에 따라 원하는 날짜 데이터 텍스트 반환
     def get_date_string(self, return_type = 0):
         if(return_type == 1):
             return_string = str(self.month) + '월'
@@ -57,26 +60,10 @@ class Today(Date):
         self.set_today()
 
 
-
+# 해당 년, 월의 마지막 날 수 반환
 def last_day_of_month(year = datetime.now().year, month = Today().month):
     last_day = calendar.monthrange(year , month)[1]
     return last_day
 if __name__ == '__main__':
     today = Today()
     print(today.day, today. month, today.week)
-
-# Date 인스턴스 생성
-#date_instance1 = Date()
-#print(f"Date(): week={date_instance1.week}, month={date_instance1.month}, day={date_instance1.day}")
-
-# Date(1) 인스턴스 생성
-#date_instance2 = Date(33)
-#print(f"Date(1): week={date_instance2.week}, month={date_instance2.month}, day={date_instance2.day}")
-
-
-
-
-# 현재 날짜를 가져와서 사용
-#current_date = datetime.now()
-#current_month = current_date.month()
-#current_day = current_date.day()

@@ -3,6 +3,7 @@ from nltk.tokenize import word_tokenize
 # 오늘 내일 등의 용어
 # 1월, 2일 등 정해진 포맷
 
+# 텍스트에서 날짜를 추출
 def extract_text_and_date(text):
     word_list = word_tokenize(text)
     date = Date()
@@ -19,7 +20,7 @@ def extract_text_and_date(text):
     text = new_text
     return date
     
-
+# 텍스트의 날짜 관용어에서 날짜를 추출
 def date_phrase_to_date(word):
     today = Today()
     date_phrase_list = ['오늘', '내일', '모레', '글피']
@@ -27,7 +28,7 @@ def date_phrase_to_date(word):
         if is_in_token(word,date_phrase_list[i]):
             return today.get_next_date(i)
     return Date()
-
+# 텍스트에서 몇월인지 추출
 def date_text_to_month(word):
     month = Today().month
     try:
@@ -36,7 +37,7 @@ def date_text_to_month(word):
     except:
         pass
     return month
-
+# 텍스트에서 몇일인지 추출
 def date_text_to_day(word):
     day = 0
     try:
@@ -46,7 +47,7 @@ def date_text_to_day(word):
         pass
     return day
 
-
+#텍스트에서 주기를 추출
 def extract_term_from_text(text):
     word_list = word_tokenize(text)
     term = 0
@@ -58,7 +59,7 @@ def extract_term_from_text(text):
         if (term != 0):
             break
     return term
-
+#주기 관용어에서 주기 추출
 def term_pharse_to_date(word):
     term_phrase_list = ['하루', '이틀', '사흘', '나흘']
     for i in range(0, 4):
@@ -71,7 +72,7 @@ def term_pharse_to_date(word):
     for week_phrase in week_phrase_list:
         if is_in_token(word, week_phrase):
             return 7
-    
+# 날짜 텍스트를 날짜로 반환
 def term_text_to_date(word):
     term = 0
     try:
@@ -86,7 +87,7 @@ def term_text_to_date(word):
     except:
         pass
     return term
-
+# 텍스트에 단어가 있는지 확인
 def is_in_token(text, word):
     
     for i in range(0, len(text)-len(word) + 1):

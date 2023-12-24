@@ -47,7 +47,6 @@ class Page():
             del self.opened_pages[last_index]
         else:
             print('이전 페이지가 없습니다.')
-# 매우 중요! : 0 입력시 실행될 페이지의 타입을 입력받고, 오픈페이지 메서드를 통합하는 방법 고려
 
 
 
@@ -117,14 +116,6 @@ class MainGoalPage(GoalPage):
     def __init__(self):
         self.goal = Goal()
         super().__init__(self.goal)
-        '''
-        업데이트 전 코드
-        del self.sub_goal_list[0]
-        del self.menu_list[0]
-        '''
-        # + 한자리수 번호 목표 중에 하위 목표가 있는 목표들을 출력?
-        #main_goal_list = [goal for goal in GoalField().data if goal.get_level() == 0]
-        #main_goal_contents = [goal.get_content() for goal in main_goal_list]
         self.basic_menu[4] = '0. 오늘 목표로 전환'
     def update_page(self):
         self.__init__()
@@ -175,12 +166,7 @@ class EditGoalPage(GoalPage):
     def __init__(self, goal):
         super().__init__(goal)
         # 이 조건은 왜 self.goal == Goal()이 안되는 건지?
-        '''
-        # 메인 목표 페이지에서 실행시 첫 하위 목표(메인 목표를 나타내는 목표) 삭제
-        if self.goal.goal_number == Goal().goal_number:
-            del self.sub_goal_list[0]
-            del self.menu_list[0]
-        '''
+
         # 기본 메뉴 : -1, 0, ?, esc
         for i in range(0,3):
             del self.basic_menu[0]
@@ -211,59 +197,10 @@ class AddGoalPage(EditGoalPage):
         # 입력받은 내용을 목표에 추가
         else:
             GoalField().set_sub_goal(self.goal,Goal(), command)
-            '''
-            # 업데이트 전
-            # 마지막 하위 목표 탐색
-            current_goal_number = self.goal.goal_number
-            last_sub_goal_index = len(self.sub_goal_list) - 1
-            # 목표 데이터 필드 상 마지막 하위 목표의 인덱스 계산, 새 목표의 마지막 번호 계산
-            # 하위 목표가 존재할 경우 생성 방법
-            if last_sub_goal_index >= 0:
-                last_sub_goal = self.sub_goal_list[last_sub_goal_index]
-                goal_level = last_sub_goal.get_goal_level()
-                last_part_number = last_sub_goal.get_part_number(goal_level)
-                new_part_number = to_digit_number(int(last_part_number)+1, last_sub_goal.DIGIT_SIZE)
-                last_index = GoalField().data.index(last_sub_goal)
-            # 하위 목표가 없는 경우 현재 페이지의 목표의 인덱스로 계산
-            else:
-                new_part_number = '01'
-                last_index = GoalField().data.index(self.goal)
-            # 새 목표의 목표 번호 계산
-            new_goal_number = current_goal_number + new_part_number
-            # 위치에 맞게 데이터 필드에 새 목표 입력, 내용 필드에 내용 추가
-            GoalField().data.insert(last_index+1,Goal(new_goal_number))
-            GoalField().contents[new_goal_number] = command
-            '''
+
             
         terminate = False
         return terminate
-
-        '''
-        else:
-            current_goal_number = self.goal.goal_number
-            last_goal = None
-            # 마지막 하위 목표 탐색
-            for goal in GoalField().data:
-                if goal.get_higher_goal_number() == current_goal_number:
-                    last_goal = goal
-            # 하위 목표가 존재하면 
-            if last_goal != None:
-                goal_level = last_goal.get_goal_level()
-                last_part_number = last_goal.get_part_number(goal_level)
-                if last_part_number != '':
-                    new_part_number = to_digit_number(int(last_part_number)+1, last_goal.DIGIT_SIZE)
-                else:
-                    new_part_number = '01'
-                new_goal_number = current_goal_number + new_part_number
-                last_index = GoalField().data.index(last_goal)
-            # 하위 목표가 없는 경우, 1번 하위 목표 추가, 입력받은 내용 저장
-            else:
-                new_goal_number = current_goal_number + '01'
-                last_index = GoalField().data.index(self.goal)
-            GoalField().data.insert(last_index+1,Goal(new_goal_number))
-            GoalField().contents[new_goal_number] = command
-        
-        '''
 
 # 목표 삭제 페이지
 class DeleteGoalPage(EditGoalPage):
@@ -623,7 +560,7 @@ class GoalInformationPage(Page):
             print('잘못 입력하였습니다.')
         
 
-
+    # 상위 목표 설정
     def set_higher_goal(self):
         print('---------------------------------------------------')
         higher_goal_content = input("\n상위 목표 변경 : ")
@@ -633,7 +570,7 @@ class GoalInformationPage(Page):
             GoalField().set_sub_goal(higher_goal, self.goal, self.goal.get_content())
         except:
             print('입력한 목표가 존재하지 않습니다.')
-    
+    # 날짜 성정
     def set_date(self):
         print('---------------------------------------------------')
         input_text = input("\n날짜 변경 : ")
@@ -642,7 +579,7 @@ class GoalInformationPage(Page):
             self.goal.date = date
         else:
             print('날짜를 인식하지 못하였습니다.')
-
+    # 기한 설정
     def set_deadline(self):
         print('---------------------------------------------------')
         input_text = input("\n기한 변경 : ")
@@ -651,10 +588,16 @@ class GoalInformationPage(Page):
             self.goal.deadline = date
         else:
             print('기한을 인식하지 못하였습니다.')
-    
+    # 기간 설정
     def set_term(self):
         print('---------------------------------------------------')
         input_text = input("\n주기 변경 : ")
+        try:
+            int_text = int(input_text)
+        except:
+            pass
+        else:
+            self.goal.term = term
         term = extract_term_from_text(input_text)
         if(term != 0):
             self.goal.term = term
@@ -665,36 +608,3 @@ class GoalInformationPage(Page):
 class HelpPage(Page):
     def __init__(self):
         super().__init__('도움말')
-
-'''
-#이전 페이지의 타이틀에 넣어야 함.
-# 목표 -> 상위 목표, 날짜 -> 날짜
-#아무것도 없는 곳은 새로 만들어야 함?
-def open_add_goal(page_title,opened_goal):
-    ADD_PAGE_TITLE = '목표 추가'
-    goal_content = opened_goal.get_content()
-    add_page = EditPage(ADD_PAGE_TITLE,'+')
-    add_page.print_front()
-    print('\n')
-    input_date = input()
-
-
-
-
-def open_delete_goal(current_page):
-    delete_page = EditPage(current_page, '-')
-'''
-
-
-'''
-페이지 종류
-1. 메인 목표 페이지
-2. 메인 날짜 페이지
-3. 목표 페이지
-4. 날짜 페이지
-5. 목표 추가 페이지
-6. 날짜 추가 페이지
-7. 삭제 페이지(입력 : 현재 페이지 - 메뉴)
-9. 도움말 페이지
-'''
-
